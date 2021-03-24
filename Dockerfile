@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ubuntu:bionic-20200311
+ARG BASE_IMAGE=ubuntu:18.04
 FROM $BASE_IMAGE
 ENV BASE_IMAGE=$BASE_IMAGE
 
@@ -100,10 +100,11 @@ ENV PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools
 ARG APPIUM_VERSION=1.20.2
 ENV APPIUM_VERSION=$APPIUM_VERSION
 
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash && \
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash && \
     apt-get -qqy install nodejs && \
     npm install -g appium@${APPIUM_VERSION} --unsafe-perm=true --allow-root && \
-    npm cache clean --force && \
+    exit 0 && \
+    npm cache clean && \
     apt-get remove --purge -y npm && \
     apt-get autoremove --purge -y && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
