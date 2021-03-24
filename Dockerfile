@@ -121,17 +121,17 @@ RUN apt-get update && \
 #===================================
 RUN pip3 install robotframework robotframework-seleniumlibrary robotframework-appiumlibrary==1.5.0.2 | grep "Successfully installed"
 
-#===========================================================================
-# Install Java 11 LTS / OpenJDK 11
-#===========================================================================
-RUN if grep -q Debian /etc/os-release && grep -q stretch /etc/os-release; then \
-		echo 'deb http://deb.debian.org/debian stretch-backports main' | tee -a /etc/apt/sources.list.d/stretch-backports.list; \
-	elif grep -q Ubuntu /etc/os-release && grep -q xenial /etc/os-release; then \
-		apt-get update && apt-get install -y software-properties-common && \
-		add-apt-repository -y ppa:openjdk-r/ppa; \
-	fi && \
-	apt-get update && apt-get install -y openjdk-11-jre openjdk-11-jre-headless openjdk-11-jdk openjdk-11-jdk-headless && \
-	apt-get install -y bzip2 libgconf-2-4 # for extracting firefox and running chrome, respectively
+# #===========================================================================
+# # Install Java 11 LTS / OpenJDK 11
+# #===========================================================================
+# RUN if grep -q Debian /etc/os-release && grep -q stretch /etc/os-release; then \
+# 		echo 'deb http://deb.debian.org/debian stretch-backports main' | tee -a /etc/apt/sources.list.d/stretch-backports.list; \
+# 	elif grep -q Ubuntu /etc/os-release && grep -q xenial /etc/os-release; then \
+# 		apt-get update && apt-get install -y software-properties-common && \
+# 		add-apt-repository -y ppa:openjdk-r/ppa; \
+# 	fi && \
+# 	apt-get update && apt-get install -y openjdk-11-jre openjdk-11-jre-headless openjdk-11-jdk openjdk-11-jdk-headless && \
+# 	apt-get install -y bzip2 libgconf-2-4 # for extracting firefox and running chrome, respectively
 
 # install firefox
 #
@@ -143,6 +143,25 @@ RUN FIREFOX_URL="https://download.mozilla.org/?product=firefox-latest-ssl&os=lin
   && apt-get install -y libgtk3.0-cil-dev libasound2 libasound2 libdbus-glib-1-2 libdbus-1-3 \
   && rm -rf /tmp/firefox.* \
   && firefox --version
+
+#=================================
+# install geckodriver
+#=================================
+
+RUN BASE_URL=https://github.com/mozilla/geckodriver/releases/download \
+  && VERSION=$(curl -sL \
+    https://api.github.com/repos/mozilla/geckodriver/releases/latest | \
+    grep tag_name | cut -d '"' -f 4) \
+  && curl -sL "$BASE_URL/$VERSION/geckodriver-$VERSION-linux64.tar.gz" | \
+    tar -xz -C /usr/local/bin
+
+USER root
+
+ENTRYPOINT ["entrypoint", "geckodriver"]
+
+CMD ["--host", "0.0.0.0"]
+
+EXPOSE 4444
 
 # install chrome
 
@@ -164,24 +183,7 @@ RUN CHROME_VERSION="$(google-chrome --version)" \
     && chmod +x /usr/local/bin/chromedriver \
     && chromedriver --version
 
-#=================================
-# install geckodriver
-#=================================
 
-RUN BASE_URL=https://github.com/mozilla/geckodriver/releases/download \
-  && VERSION=$(curl -sL \
-    https://api.github.com/repos/mozilla/geckodriver/releases/latest | \
-    grep tag_name | cut -d '"' -f 4) \
-  && curl -sL "$BASE_URL/$VERSION/geckodriver-$VERSION-linux64.tar.gz" | \
-    tar -xz -C /usr/local/bin
-
-USER root
-
-ENTRYPOINT ["entrypoint", "geckodriver"]
-
-CMD ["--host", "0.0.0.0"]
-
-EXPOSE 4444
 
 #===================================
 # Creating emulator
