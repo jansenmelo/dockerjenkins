@@ -164,8 +164,10 @@ RUN CHROME_VERSION="$(google-chrome --version)" \
     && chmod +x /usr/local/bin/chromedriver \
     && chromedriver --version
 
-
+#=================================
 # install geckodriver
+#=================================
+
 RUN BASE_URL=https://github.com/mozilla/geckodriver/releases/download \
   && VERSION=$(curl -sL \
     https://api.github.com/repos/mozilla/geckodriver/releases/latest | \
