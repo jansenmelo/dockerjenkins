@@ -97,7 +97,7 @@ ENV PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools
 # Using this workaround to install Appium -> https://github.com/appium/appium/issues/10020 -> Please remove this workaround asap
 #====================================
 
-ARG APPIUM_VERSION=1.17.1
+ARG APPIUM_VERSION=1.20.2
 ENV APPIUM_VERSION=$APPIUM_VERSION
 
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash && \
@@ -121,19 +121,19 @@ RUN apt-get update && \
 #===================================
 RUN pip3 install robotframework robotframework-seleniumlibrary robotframework-appiumlibrary==1.5.0.2 | grep "Successfully installed"
 
-# #===========================================================================
-# # Install Java 11 LTS / OpenJDK 11
-# #===========================================================================
-# RUN if grep -q Debian /etc/os-release && grep -q stretch /etc/os-release; then \
-# 		echo 'deb http://deb.debian.org/debian stretch-backports main' | tee -a /etc/apt/sources.list.d/stretch-backports.list; \
-# 	elif grep -q Ubuntu /etc/os-release && grep -q xenial /etc/os-release; then \
-# 		apt-get update && apt-get install -y software-properties-common && \
-# 		add-apt-repository -y ppa:openjdk-r/ppa; \
-# 	fi && \
-# 	apt-get update && apt-get install -y openjdk-11-jre openjdk-11-jre-headless openjdk-11-jdk openjdk-11-jdk-headless && \
-# 	apt-get install -y bzip2 libgconf-2-4 # for extracting firefox and running chrome, respectively
+#===========================================================================
+# Install Java 11 LTS / OpenJDK 11
+#===========================================================================
+RUN if grep -q Debian /etc/os-release && grep -q stretch /etc/os-release; then \
+		echo 'deb http://deb.debian.org/debian stretch-backports main' | tee -a /etc/apt/sources.list.d/stretch-backports.list; \
+	elif grep -q Ubuntu /etc/os-release && grep -q xenial /etc/os-release; then \
+		apt-get update && apt-get install -y software-properties-common && \
+		add-apt-repository -y ppa:openjdk-r/ppa; \
+	fi && \
+	apt-get update && apt-get install -y openjdk-11-jre openjdk-11-jre-headless openjdk-11-jdk openjdk-11-jdk-headless && \
+	apt-get install -y bzip2 libgconf-2-4 # for extracting firefox and running chrome, respectively
 
-# install firefox
+# # install firefox
 #
 RUN FIREFOX_URL="https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US" \
   && ACTUAL_URL=$(curl -Ls -o /dev/null -w %{url_effective} $FIREFOX_URL) \
@@ -144,9 +144,9 @@ RUN FIREFOX_URL="https://download.mozilla.org/?product=firefox-latest-ssl&os=lin
   && rm -rf /tmp/firefox.* \
   && firefox --version
 
-#=================================
-# install geckodriver
-#=================================
+# #=================================
+# # install geckodriver
+# #=================================
 
 RUN BASE_URL=https://github.com/mozilla/geckodriver/releases/download \
   && VERSION=$(curl -sL \
@@ -155,13 +155,13 @@ RUN BASE_URL=https://github.com/mozilla/geckodriver/releases/download \
   && curl -sL "$BASE_URL/$VERSION/geckodriver-$VERSION-linux64.tar.gz" | \
     tar -xz -C /usr/local/bin
 
-USER root
+# USER root
 
-ENTRYPOINT ["entrypoint", "geckodriver"]
+# ENTRYPOINT ["entrypoint", "geckodriver"]
 
-CMD ["--host", "0.0.0.0"]
+# # CMD ["--host", "0.0.0.0"]
 
-EXPOSE 4444
+# EXPOSE 4444
 
 # install chrome
 
@@ -185,11 +185,11 @@ RUN CHROME_VERSION="$(google-chrome --version)" \
 
 
 
-#===================================
-# Creating emulator
-#===================================
-RUN echo y | sdkmanager 'system-images;android-29;default;x86_64' && \
-echo no | avdmanager create avd -n emulator -k 'system-images;android-29;default;x86_64'
+# #===================================
+# # Creating emulator
+# #===================================
+# RUN echo y | sdkmanager 'system-images;android-29;default;x86_64' && \
+# echo no | avdmanager create avd -n emulator -k 'system-images;android-29;default;x86_64'
 
 #================================
 # APPIUM Test Distribution (ATD)
